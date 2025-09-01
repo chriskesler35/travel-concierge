@@ -77,7 +77,7 @@ export default function Account() {
         setPrivacySettings(prev => ({ ...prev, ...userData.privacy_settings }));
       }
 
-      const userJourneys = await Journey.filter({ created_by: userData.email }, "-created_date");
+      const userJourneys = await Journey.filter({ created_by: userData.email }, "created_at DESC");
       setJourneys(userJourneys);
 
     } catch (error) {

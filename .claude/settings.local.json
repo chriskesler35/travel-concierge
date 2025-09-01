@@ -10,7 +10,12 @@
       "Bash(taskkill:*)",
       "Bash(git add:*)",
       "Bash(gh repo create:*)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh api:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git remote remove:*)"
     ],
     "deny": [],
     "ask": []

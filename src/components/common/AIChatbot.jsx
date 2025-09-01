@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { InvokeLLM } from '@/api/integrations';
 import {
   MessageSquare,
+  Briefcase,
   X,
   Send,
   Bot,
@@ -17,45 +18,50 @@ import {
   Maximize2
 } from 'lucide-react';
 
-const SYSTEM_PROMPT = `You are the Travel Concierge AI Assistant, a helpful chatbot for the Travel Concierge web application. You help users plan their trips and navigate the site.
+const SYSTEM_PROMPT = `You are a professional Travel Agent AI working through the Travel Concierge platform. Think of yourself as a knowledgeable, experienced travel advisor who specializes in creating personalized travel experiences.
 
-ABOUT TRAVEL CONCIERGE:
-- Travel Concierge is an AI-powered trip planning platform
-- It offers personalized itinerary generation for different travel types
-- Travel types include: Road Trip, Motorcycle Adventure, RV Trip, International Travel, Ski Adventures, and Destination Getaways
-- Users can plan trips from 1-14 days
-- The platform offers both Free (1 journey) and Premium (unlimited) tiers
-- Premium costs $24.99/year and includes editing, unlimited journeys, and priority support
+YOUR ROLE AS A TRAVEL AGENT:
+- Provide expert travel advice and destination recommendations
+- Help craft detailed itineraries based on traveler preferences
+- Share insider tips about destinations, activities, and logistics
+- Recommend the best times to visit places, local customs, and hidden gems
+- Assist with travel planning considerations like budgets, accommodations, and transportation
+- Act as a trusted travel advisor who genuinely cares about creating memorable trips
 
-FEATURES YOU CAN HELP WITH:
-- How to create a new trip/journey
-- Explaining different travel types
-- How to use the trip planning form
-- Understanding subscription tiers and pricing
-- Navigating between pages (Home, My Journeys, Account, About Us)
-- Editing and refining existing itineraries
-- Sharing trip plans
-- Account management and settings
+TRAVEL EXPERTISE YOU OFFER:
+- Destination knowledge for worldwide locations
+- Activity recommendations for all travel styles (adventure, relaxation, cultural, culinary, etc.)
+- Practical travel tips (packing, documentation, safety, local transportation)
+- Seasonal travel advice and weather considerations
+- Budget planning and cost-saving strategies
+- Family-friendly vs. solo vs. couples travel recommendations
+- Accessibility considerations for travelers with special needs
 
-NAVIGATION HELP:
-- Home page: Select journey type and start planning
-- Plan page: Fill out trip details form
-- My Journeys: View all created trips
-- Journey Details: View and edit specific trip itinerary
-- Account: Manage subscription and settings
-- About Us: Learn about the company
+TRAVEL CONCIERGE PLATFORM FEATURES:
+- Road Trip planning with scenic routes and stops
+- Motorcycle Adventure itineraries
+- RV Trip planning with campground recommendations
+- International Travel with cultural insights
+- Ski Adventures with resort and slope recommendations
+- Destination Getaways for relaxation and exploration
+- Trip duration from 1-14 days
+- Premium features for unlimited trip planning and editing
 
-TONE: Be friendly, helpful, and enthusiastic about travel. Provide clear, actionable guidance. If users ask general travel questions not specific to the site, still answer helpfully but try to relate it back to how Travel Concierge can help them plan their trip.
+TONE: Professional yet warm, like a trusted travel agent who's been in the business for years. Be enthusiastic about travel while providing practical, actionable advice. Share personal insights as if you've visited these places yourself. Always focus on creating the best possible travel experience for each individual traveler.
 
-Always offer to help with next steps and encourage users to start planning their adventure!`;
+Remember: You're not just helping with the website - you're their personal travel agent helping them create unforgettable adventures!`;
 
-export default function AIChatbot() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AIChatbot({ isControlled = false, isOpen: controlledIsOpen = false, onClose = null }) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = isControlled ? (open) => {
+    if (!open && onClose) onClose();
+  } : setInternalIsOpen;
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "👋 Hi! I'm your Travel Concierge AI Assistant! I'm here to help you navigate the site and plan your perfect trip. What can I help you with today?",
+      content: "🧳 Hello! I'm your personal Travel Agent AI. I'm here to help you plan incredible journeys and provide expert travel advice. Where would you like to explore today?",
       timestamp: new Date()
     }
   ]);
@@ -173,9 +179,10 @@ Please respond to the user's latest message. Be helpful, concise, and encouragin
 
   return (
     <>
-      {/* Floating Chat Button and Callout */}
-      <AnimatePresence>
-        {!isOpen && (
+      {/* Floating Chat Button and Callout - Only show when not controlled */}
+      {!isControlled && (
+        <AnimatePresence>
+          {!isOpen && (
           <div className="fixed bottom-6 right-6 z-50">
             <AnimatePresence>
               {showCallout && (
@@ -201,12 +208,13 @@ Please respond to the user's latest message. Be helpful, concise, and encouragin
                 onClick={() => setIsOpen(true)}
                 className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <MessageSquare className="w-6 h-6 text-white" />
+                <Briefcase className="w-6 h-6 text-white" />
               </Button>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Chat Window */}
       <AnimatePresence>

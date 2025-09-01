@@ -54,7 +54,7 @@ export default function Journeys() {
         const userEmail = userData.email;
 
         // Load created journeys (this works fine with RLS)
-        const created = await Journey.filter({ created_by: userEmail }, "-created_date");
+        const created = await Journey.filter({ created_by: userEmail }, "created_at DESC");
 
         // Use backend function to get ALL shared journeys (accepted + pending)
         try {
@@ -228,16 +228,6 @@ export default function Journeys() {
     );
   }
   
-  if (!user) {
-    return (
-      <div className="p-6 flex flex-col items-center justify-center text-center h-full">
-        <Compass className="w-16 h-16 text-slate-400 mb-4" />
-        <h2 className="text-xl font-bold text-slate-800 mb-2">Sign in to view your journeys</h2>
-        <p className="text-slate-600 mb-4">Log in to see your saved trip plans and continue your adventure.</p>
-        <Button onClick={() => User.login()}>Sign In</Button>
-      </div>
-    );
-  }
 
   const totalJourneys = createdJourneys.length + sharedJourneys.length;
 
@@ -513,9 +503,9 @@ export default function Journeys() {
       {totalJourneys === 0 && pendingShares.length === 0 && (
         <div className="text-center py-16 px-6 bg-white/80 rounded-xl shadow-sm">
           <Compass className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-800">No Journeys Yet</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Build Your First Journey</h3>
           <p className="text-slate-500 mt-2 mb-4 max-w-md mx-auto">
-            You haven't planned any journeys. Let's create your first one!
+            Ready to start your next adventure? Create your first journey and let our AI help you plan the perfect trip!
           </p>
           <Button onClick={() => navigate(createPageUrl('Home'))}>
             Start Planning

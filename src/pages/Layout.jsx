@@ -21,7 +21,7 @@ import {
   Info,
   Star,
   HelpCircle, // Added HelpCircle icon
-  Bot // Added Bot icon
+  Briefcase // Travel agent icon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export default function Layout({ children, currentPageName }) {
   const [hasTrackedLogin, setHasTrackedLogin] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false); // State for the guide modal
+  const [showAIAssistant, setShowAIAssistant] = useState(false); // State for AI Assistant chatbot
   const [feedbackData, setFeedbackData] = useState({
     name: '',
     email: '',
@@ -188,8 +189,8 @@ export default function Layout({ children, currentPageName }) {
     },
     {
       title: "AI Assistant",
-      url: createPageUrl("AIAssistant"),
-      icon: Bot,
+      onClick: () => setShowAIAssistant(true),
+      icon: Briefcase,
     },
     {
       title: "Guide",
@@ -465,8 +466,12 @@ export default function Layout({ children, currentPageName }) {
         </DialogContent>
       </Dialog>
 
-      {/* AI Chatbot - Available on all pages */}
-      <AIChatbot />
+      {/* AI Assistant Chatbot - Controlled by menu */}
+      <AIChatbot 
+        isControlled={true}
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+      />
 
       {/* Quick Guide Modal */}
       <QuickGuideModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />

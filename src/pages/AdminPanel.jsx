@@ -928,7 +928,7 @@ Email: ${newUser.email} was not added automatically.`);
                             </Badge>
                           </td>
                           <td className="p-3">
-                            <span className="text-slate-500">{formatDateSafely(journey.created_date)}</span>
+                            <span className="text-slate-500">{formatDateSafely(journey.created_at)}</span>
                           </td>
                           <td className="p-3">
                             <Button

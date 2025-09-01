@@ -44,6 +44,7 @@ CREATE TABLE journeys (
     ),
     notes TEXT,
     stops_of_interest TEXT,
+    waypoints JSONB DEFAULT '[]'::jsonb, -- Array of waypoints/stops for route-based trips
     ski_days INTEGER DEFAULT 0,
     
     -- Flight information
@@ -63,6 +64,9 @@ CREATE TABLE journeys (
     -- Sharing
     shares JSONB DEFAULT '[]'::jsonb, -- Array of {email, permissions}
     is_shared BOOLEAN DEFAULT FALSE,
+    
+    -- Trip calculation fields
+    estimated_drive_time INTEGER, -- Estimated driving time in minutes for driving/motorcycle/RV trips
     
     -- Admin/system fields
     ai_generation_completed BOOLEAN DEFAULT FALSE,
