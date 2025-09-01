@@ -1,13 +1,14 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { User } from "@/api/entities";
 import { Feedback } from "@/api/entities";
 import { trackLogin } from "@/api/functions";
-import AIChatbot from './components/common/AIChatbot';
-import QuickGuideModal from './components/common/QuickGuideModal'; // Added import for QuickGuideModal
+import { supabase } from "@/lib/supabase";
+import AIChatbot from '@/components/common/AIChatbot';
+import QuickGuideModal from '@/components/common/QuickGuideModal';
 import {
   MapPin,
   User as UserIcon,
@@ -37,6 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [hasTrackedLogin, setHasTrackedLogin] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -49,24 +51,38 @@ export default function Layout({ children, currentPageName }) {
   });
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadUser();
+    
+    // Set up Supabase auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        loadUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setHasTrackedLogin(false);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadUser = async () => {
-    // Enhanced retry logic with better session management
-    const loadWithRetry = async (retryCount = 0) => {
-      try {
-        const userData = await User.me();
-        setUser(userData);
-        
+    try {
+      setIsLoading(true);
+      // Use the same auth service as the rest of the app
+      const userData = await User.me();
+      setUser(userData);
+      
+      if (userData) {
         // Track login for ALL users, not just first-time loads
         // Use a session storage key that includes user ID for better tracking
         const sessionKey = `loginTracked_${userData.id}`;
         const alreadyTracked = sessionStorage.getItem(sessionKey);
         
-        if (userData && !alreadyTracked) {
+        if (!alreadyTracked) {
           console.log(`Tracking login for user: ${userData.email}`);
           sessionStorage.setItem(sessionKey, 'true');
 
@@ -78,26 +94,17 @@ export default function Layout({ children, currentPageName }) {
             console.warn('Login tracking failed (non-critical):', error);
             // Don't retry - just log and continue
           }
-        } else if (alreadyTracked) {
+        } else {
           console.log(`Login already tracked this session for user: ${userData.email}`);
           setHasTrackedLogin(true);
         }
-      } catch (error) {
-        console.error("Error loading user:", error);
-        
-        // Handle rate limiting with exponential backoff
-        if (error.response?.status === 429 && retryCount < 2) {
-          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s
-          console.warn(`Rate limited loading user, retrying in ${delay}ms (attempt ${retryCount + 1})`);
-          setTimeout(() => loadWithRetry(retryCount + 1), delay);
-          return;
-        }
-        
-        setUser(null);
       }
-    };
-
-    await loadWithRetry();
+    } catch (error) {
+      console.error('Error in loadUser:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleLogout = async () => {
@@ -108,9 +115,10 @@ export default function Layout({ children, currentPageName }) {
       }
     });
     
-    await User.logout();
+    await supabase.auth.signOut();
     setUser(null);
     setHasTrackedLogin(false);
+    navigate('/');
   };
 
   const getAdminNav = () => {
@@ -201,6 +209,18 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   const allNavItems = [...navigationItems, getAdminNav()].filter(Boolean);
+
+  // Show loading state briefly while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50">
@@ -323,7 +343,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
           ) : (
-            <Button onClick={() => User.login()} className="w-full mt-2 bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => navigate('/auth')} className="w-full mt-2 bg-blue-600 hover:bg-blue-700">
               Sign In
             </Button>
           )}

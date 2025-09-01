@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/utils/index";
 import { motion } from "framer-motion";
 import {
   Globe,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Feedback } from "@/api/entities";
+import { supabase } from "@/lib/supabase";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -89,15 +90,40 @@ export default function Home() {
 
   useEffect(() => {
     loadUser();
+
+    // Listen for authentication state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change in Home:', event, session?.user?.email);
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        loadUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setFeedback(initialFeedbackState);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadUser = async () => {
     setIsLoadingUser(true);
     try {
+      console.log('Loading user...');
       const userData = await User.me();
+      console.log('User data loaded:', userData);
       setUser(userData);
-      setFeedback(prev => ({ ...prev, name: userData.full_name, email: userData.email }));
+      if (userData) {
+        console.log('User role:', userData.role, 'Subscription:', userData.subscription_tier);
+        setFeedback(prev => ({ 
+          ...prev, 
+          name: userData.full_name || '', 
+          email: userData.email || '' 
+        }));
+      } else {
+        console.log('No user data returned');
+      }
     } catch (error) {
+      console.error('Error loading user:', error);
       setUser(null);
     } finally {
       setIsLoadingUser(false);

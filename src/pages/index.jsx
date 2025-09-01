@@ -1,24 +1,21 @@
+import { lazy, Suspense } from 'react';
 import Layout from "./Layout.jsx";
-
-import Home from "./Home";
-
-import Journeys from "./Journeys";
-
-import Account from "./Account";
-
-import JourneyDetails from "./JourneyDetails";
-
-import TestPage from "./TestPage";
-
-import AdminPanel from "./AdminPanel";
-
-import AboutUs from "./AboutUs";
-
-import Plan from "./Plan";
-
-import AIAssistant from "./AIAssistant";
-
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+
+// Lazy load all page components
+const Home = lazy(() => import("./Home"));
+const DebugHome = lazy(() => import("./DebugHome"));
+const Journeys = lazy(() => import("./Journeys"));
+const Account = lazy(() => import("./Account"));
+const JourneyDetails = lazy(() => import("./JourneyDetails"));
+const TestPage = lazy(() => import("./TestPage"));
+const AdminPanel = lazy(() => import("./AdminPanel"));
+const AboutUs = lazy(() => import("./AboutUs"));
+const Plan = lazy(() => import("./Plan"));
+const AIAssistant = lazy(() => import("./AIAssistant"));
+const Login = lazy(() => import("./Login"));
+const SupabaseLogin = lazy(() => import("./SupabaseLogin"));
+const DatabaseTest = lazy(() => import("./DatabaseTest"));
 
 const PAGES = {
     
@@ -39,6 +36,12 @@ const PAGES = {
     Plan: Plan,
     
     AIAssistant: AIAssistant,
+    
+    Login: Login,
+    
+    SupabaseLogin: SupabaseLogin,
+    
+    DatabaseTest: DatabaseTest,
     
 }
 
@@ -62,30 +65,39 @@ function PagesContent() {
     
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<Home />} />
-                
-                
-                <Route path="/Home" element={<Home />} />
-                
-                <Route path="/Journeys" element={<Journeys />} />
-                
-                <Route path="/Account" element={<Account />} />
-                
-                <Route path="/JourneyDetails" element={<JourneyDetails />} />
-                
-                <Route path="/TestPage" element={<TestPage />} />
-                
-                <Route path="/AdminPanel" element={<AdminPanel />} />
-                
-                <Route path="/AboutUs" element={<AboutUs />} />
-                
-                <Route path="/Plan" element={<Plan />} />
-                
-                <Route path="/AIAssistant" element={<AIAssistant />} />
-                
-            </Routes>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+                <Routes>            
+                    
+                        <Route path="/" element={<Home />} />
+                        <Route path="/debug" element={<DebugHome />} />
+                    
+                    
+                    <Route path="/Home" element={<Home />} />
+                    
+                    <Route path="/Journeys" element={<Journeys />} />
+                    
+                    <Route path="/Account" element={<Account />} />
+                    
+                    <Route path="/JourneyDetails" element={<JourneyDetails />} />
+                    
+                    <Route path="/TestPage" element={<TestPage />} />
+                    
+                    <Route path="/AdminPanel" element={<AdminPanel />} />
+                    
+                    <Route path="/AboutUs" element={<AboutUs />} />
+                    
+                    <Route path="/Plan" element={<Plan />} />
+                    
+                    <Route path="/AIAssistant" element={<AIAssistant />} />
+                    
+                    <Route path="/login" element={<Login />} />
+                    
+                    <Route path="/auth" element={<SupabaseLogin />} />
+                    
+                    <Route path="/database-test" element={<DatabaseTest />} />
+                    
+                </Routes>
+            </Suspense>
         </Layout>
     );
 }

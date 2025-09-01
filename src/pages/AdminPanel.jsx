@@ -7,6 +7,7 @@ import { DiscountCode } from "@/api/entities";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 import {
   Users,
   MapPin,
@@ -154,13 +155,25 @@ export default function AdminPanel() {
       }
 
       // Load all data for admin view with error handling
-      // Admin can see all journeys regardless of RLS
+      // Use direct Supabase queries for admin access
       const loadPromises = [
-      User.list("-created_date").catch((err) => {console.error('Error loading users:', err);return [];}),
-      Journey.list("-created_date").catch((err) => {console.error('Error loading journeys:', err);return [];}),
-      Feedback.list("-created_date").catch((err) => {console.error('Error loading feedback:', err);return [];}),
-      DiscountCode.list("-created_date").catch((err) => {console.error('Error loading discount codes:', err);return [];})];
-
+        // Fetch users from users table
+        supabase.from('users').select('*').order('created_at', { ascending: false })
+          .then(response => {
+            if (response.error) throw response.error;
+            return response.data;
+          })
+          .catch((err) => {console.error('Error loading users:', err);return [];}),
+        
+        // Fetch journeys
+        Journey.list("-created_at").catch((err) => {console.error('Error loading journeys:', err);return [];}),
+        
+        // Fetch feedback  
+        Feedback.list("-created_at").catch((err) => {console.error('Error loading feedback:', err);return [];}),
+        
+        // Fetch discount codes
+        DiscountCode.list("-created_at").catch((err) => {console.error('Error loading discount codes:', err);return [];})
+      ];
 
       const [usersData, journeysData, feedbackData, discountCodesData] = await Promise.all(loadPromises);
 

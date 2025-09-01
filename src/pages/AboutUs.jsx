@@ -32,7 +32,7 @@ export default function AboutUs() {
           className="relative w-full h-64 sm:h-80 rounded-xl shadow-2xl overflow-hidden mb-16"
         >
           <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/a27bc9b10_IMG_6787.jpg" 
+            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80" 
             alt="Travel Concierge Team" 
             className="w-full h-full object-cover"
           />
