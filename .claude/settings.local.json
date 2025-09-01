@@ -8,7 +8,9 @@
       "Bash(npx vite:*)",
       "Bash(pkill:*)",
       "Bash(taskkill:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git remote add:*)"
     ],
     "deny": [],
     "ask": []
